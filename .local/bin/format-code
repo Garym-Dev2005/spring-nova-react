@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+# Format the api/ Kotlin sources (Spotless + ktlint). Runs in the dev container
+# when it's up, otherwise on a host JDK. Same logic the pre-commit hook uses.
+#   format-code          apply formatting
+#   format-code --check  only report violations (non-zero exit if any)
+source "$(dirname "${BASH_SOURCE[0]}")/../lib/format-kotlin.sh" "$@"
