@@ -1,0 +1,88 @@
+# Podman note: run with `podman compose` / `podman-compose`, rootless.
+# `userns_mode: keep-id` maps your host user to uid/gid 1000 (vscode) so the
+# bind-mounted workspace is writable.
+name: react-java-dev
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    command: sleep infinity
+    userns_mode: "keep-id:uid=1000,gid=1000"
+    volumes:
+      - ..:/workspaces/${LOCAL_WORKSPACE_FOLDER_BASENAME:-podman-devcontainer}:cached,z
+      # Credentials + CA cert written by the emulator, read by the SDKs here.
+      - emulator-data:/home/vscode/.aws/emulator
+    depends_on:
+      db:
+        condition: service_healthy
+    # No depends_on for aws-emulator: it joins this container's network
+    # namespace (cycle). emulator-trust.sh waits for it on start instead.
+    environment:
+      # --- Postgres ---
+      PGHOST: db
+      PGPORT: "5432"
+      PGUSER: app
+      PGPASSWORD: app
+      PGDATABASE: app
+      DATABASE_URL: postgresql://app:app@db:5432/app
+      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/app
+      SPRING_DATASOURCE_USERNAME: app
+      SPRING_DATASOURCE_PASSWORD: app
+      # --- AWS Emulator (shares this container's network => 127.0.0.1) ---
+      AWS_ENDPOINT_URL: https://127.0.0.1:9297
+      AWS_SHARED_CREDENTIALS_FILE: /home/vscode/.aws/emulator/9297/emulator_credentials
+      AWS_CONFIG_FILE: /home/vscode/.aws/emulator/9297/config
+      AWS_CA_BUNDLE: /home/vscode/.aws/emulator/9297/ca.pem
+      AWS_EC2_METADATA_DISABLED: "true"
+      AWS_DISABLE_HOST_PREFIX_INJECTION: "true"
+      AWS_REGION: us-east-1
+      AWS_DEFAULT_REGION: us-east-1
+      # Merged (JDK defaults + emulator CA) stores built by emulator-trust.sh,
+      # so Maven/Gradle downloads keep working alongside the emulator.
+      NODE_EXTRA_CA_CERTS: /home/vscode/.aws/emulator/9297/ca.pem
+      JAVA_TOOL_OPTIONS: >-
+        -Djavax.net.ssl.trustStore=/home/vscode/.aws/emulator-trust/truststore.p12
+        -Djavax.net.ssl.trustStoreType=PKCS12
+        -Djavax.net.ssl.trustStorePassword=changeit
+
+  db:
+    image: docker.io/library/postgres:19
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: app
+      POSTGRES_PASSWORD: app
+      POSTGRES_DB: app
+    volumes:
+      # Postgres 18+ images keep data under /var/lib/postgresql/<major>/docker
+      - pgdata:/var/lib/postgresql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U app -d app"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  aws-emulator:
+    build:
+      context: ./emulator
+    # Join the app container's network namespace: the emulator is then at
+    # 127.0.0.1:9297 (required for S3 path-style + the cert's address).
+    network_mode: "service:app"
+    userns_mode: "keep-id:uid=1000,gid=1000"
+    mem_limit: 2g
+    memswap_limit: 2g
+    restart: unless-stopped
+    environment:
+      HOME: /home/vscode
+      EMULATOR_BIND_ADDRESS: 127.0.0.1
+      EMULATOR_LISTENER_PORT_RANGE: 9298-9317
+      # Telemetry is on by default upstream; off here. Set to "on" to enable.
+      EMULATOR_TELEMETRY: off
+    command: ["-p", "9297"]
+    volumes:
+      - emulator-data:/home/vscode/.aws/emulator
+
+volumes:
+  pgdata:
+  emulator-data:

@@ -1,0 +1,46 @@
+{
+  "name": "React + Java (Podman)",
+  "dockerComposeFile": "compose.yaml",
+  "service": "app",
+  "runServices": ["app", "db", "aws-emulator"],
+  "workspaceFolder": "/workspaces/${localWorkspaceFolderBasename}",
+  "remoteUser": "vscode",
+  "updateRemoteUserUID": false,
+
+  "features": {
+    "ghcr.io/devcontainers/features/java:1": {
+      "version": "21",
+      "installMaven": "true",
+      "installGradle": "true"
+    },
+    "ghcr.io/devcontainers/features/node:1": {
+      "version": "lts"
+    },
+    "ghcr.io/devcontainers/features/aws-cli:1": {}
+  },
+
+  // The emulator generates a new cert on every start, so rebuild the merged
+  // trust stores each time the container starts.
+  "postStartCommand": "bash .devcontainer/scripts/emulator-trust.sh",
+
+  "forwardPorts": [5432, 9297, 5173, 8080],
+  "portsAttributes": {
+    "5432": { "label": "Postgres 19" },
+    "9297": { "label": "AWS Emulator (HTTPS)" },
+    "5173": { "label": "Vite" },
+    "8080": { "label": "Java app" }
+  },
+
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "vscjava.vscode-java-pack",
+        "vmware.vscode-boot-dev-pack",
+        "dbaeumer.vscode-eslint",
+        "esbenp.prettier-vscode",
+        "ckolkman.vscode-postgres",
+        "amazonwebservices.aws-toolkit-vscode"
+      ]
+    }
+  }
+}
