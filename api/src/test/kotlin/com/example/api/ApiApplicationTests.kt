@@ -1,5 +1,6 @@
 package com.example.api
 
+import com.example.api.support.IntegrationTest
 import org.junit.jupiter.api.Test
 
 @IntegrationTest

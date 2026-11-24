@@ -10,10 +10,17 @@ services:
       dockerfile: Dockerfile
     command: sleep infinity
     userns_mode: "keep-id:uid=1000,gid=1000"
+    # The emulator shares this container's network namespace, so its ports are
+    # published here. Bound to host loopback only. From the host see .envrc.
+    ports:
+      - "127.0.0.1:9297:9297"
+      - "127.0.0.1:9298-9317:9298-9317"
     volumes:
       - ..:/workspaces/${LOCAL_WORKSPACE_FOLDER_BASENAME:-podman-devcontainer}:cached,z
       # Credentials + CA cert written by the emulator, read by the SDKs here.
-      - emulator-data:/home/vscode/.aws/emulator
+      # Bind-mounted (not a named volume) so host tools can read the per-run CA
+      # at .local/emulator/9297/ca.pem.
+      - ../.local/emulator:/home/vscode/.aws/emulator:z
     depends_on:
       db:
         condition: service_healthy
@@ -32,6 +39,10 @@ services:
       # No SPRING_DATASOURCE_* here on purpose: env vars outrank properties
       # files and would defeat the API's `test` profile. application.properties
       # already defaults to db:5432/app.
+      # API auth (DEV ONLY values; never reuse). The API refuses to start without JWT_SECRET.
+      JWT_SECRET: dev-only-jwt-signing-secret-change-me-0123456789abcdef
+      APP_BOOTSTRAP_USERNAME: admin
+      APP_BOOTSTRAP_PASSWORD: admin-dev-password
       # Throwaway tmpfs Postgres used by the API's `test` Spring profile.
       TEST_DATASOURCE_URL: jdbc:postgresql://db-test:5432/app_test
       # --- AWS Emulator (shares this container's network => 127.0.0.1) ---
@@ -41,8 +52,8 @@ services:
       AWS_CA_BUNDLE: /home/vscode/.aws/emulator/9297/ca.pem
       AWS_EC2_METADATA_DISABLED: "true"
       AWS_DISABLE_HOST_PREFIX_INJECTION: "true"
-      AWS_REGION: us-east-1
-      AWS_DEFAULT_REGION: us-east-1
+      AWS_REGION: us-west-2
+      AWS_DEFAULT_REGION: us-west-2
       # Merged (JDK defaults + emulator CA) stores built by emulator-trust.sh,
       # so Maven/Gradle downloads keep working alongside the emulator.
       NODE_EXTRA_CA_CERTS: /home/vscode/.aws/emulator/9297/ca.pem
@@ -71,6 +82,7 @@ services:
   # disposable. Test results are committed (not rolled back) so you can inspect
   # them after a run: PGHOST=db-test PGDATABASE=app_test psql
   # Contents are lost when this container stops.
+  # From the host: PGPASSWORD=app psql -h localhost -p 6432 -U app app_test
   db-test:
     image: docker.io/library/postgres:19
     restart: unless-stopped
@@ -79,6 +91,8 @@ services:
       POSTGRES_USER: app
       POSTGRES_PASSWORD: app
       POSTGRES_DB: app_test
+    ports:
+      - "6432:5432"
     tmpfs:
       - /var/lib/postgresql
     healthcheck:
@@ -99,14 +113,15 @@ services:
     restart: unless-stopped
     environment:
       HOME: /home/vscode
-      EMULATOR_BIND_ADDRESS: 127.0.0.1
+      # Must be 0.0.0.0: published ports arrive on the container's non-loopback
+      # interface. Host exposure is limited to 127.0.0.1 by `ports` on app.
+      EMULATOR_BIND_ADDRESS: 0.0.0.0
       EMULATOR_LISTENER_PORT_RANGE: 9298-9317
       # Telemetry is on by default upstream; off here. Set to "on" to enable.
       EMULATOR_TELEMETRY: off
     command: ["-p", "9297"]
     volumes:
-      - emulator-data:/home/vscode/.aws/emulator
+      - ../.local/emulator:/home/vscode/.aws/emulator:z
 
 volumes:
   pgdata:
-  emulator-data:

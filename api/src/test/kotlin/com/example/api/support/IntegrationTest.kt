@@ -1,4 +1,4 @@
-package com.example.api
+package com.example.api.support
 
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc
@@ -14,5 +14,5 @@ import org.springframework.test.context.ActiveProfiles
 @SpringBootTest
 @AutoConfigureMockMvc
 @ActiveProfiles("test")
-@Import(TestDatabaseReset::class)
+@Import(TestDatabaseReset::class, TestUsers::class)
 annotation class IntegrationTest

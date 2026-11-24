@@ -2,5 +2,5 @@ pre-commit:
   commands:
     kotlin-format:
       glob: "api/**/*.{kt,kts}"
-      run: .local/lib/format-kotlin.sh
+      run: .local/bin/format-code
       stage_fixed: true

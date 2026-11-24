@@ -7,6 +7,12 @@
   "remoteUser": "vscode",
   "updateRemoteUserUID": false,
 
+  // SSH keys/config of the host user who launches the devcontainer.
+  // Read-only; userns keep-id maps their files to vscode.
+  "mounts": [
+    "source=${localEnv:HOME}/.ssh,target=/home/vscode/.ssh,type=bind,readonly"
+  ],
+
   "features": {
     "ghcr.io/devcontainers/features/java:1": {
       "version": "21",
@@ -16,17 +22,18 @@
     "ghcr.io/devcontainers/features/node:1": {
       "version": "24"
     },
-    "ghcr.io/devcontainers/features/aws-cli:1": {}
+    "ghcr.io/devcontainers/features/aws-cli:1": {},
+    "ghcr.io/duduribeiro/devcontainer-features/neovim:1": {
+      "version": "stable" // or "nightly"
+    }
   },
 
   // The emulator generates a new cert on every start, so rebuild the merged
   // trust stores each time the container starts.
   "postStartCommand": "bash .devcontainer/scripts/emulator-trust.sh",
 
-  "forwardPorts": [5432, "db-test:5432", 9297, 5173, 8080],
+  "forwardPorts": [5173, 8080],
   "portsAttributes": {
-    "5432": { "label": "Postgres 19" },
-    "db-test:5432": { "label": "Postgres 19 (tmpfs, tests)" },
     "9297": { "label": "AWS Emulator (HTTPS)" },
     "5173": { "label": "Vite" },
     "8080": { "label": "Java app" }
@@ -40,7 +47,14 @@
         "dbaeumer.vscode-eslint",
         "esbenp.prettier-vscode",
         "ckolkman.vscode-postgres",
-        "amazonwebservices.aws-toolkit-vscode"
+        "amazonwebservices.aws-toolkit-vscode",
+        "fwcd.kotlin",
+        "Gruntfuggly.todo-tree",
+        "ms-vscode.live-server",
+        "tamasfe.even-better-toml",
+        "redhat.vscode-yaml",
+        "GitHub.vscode-github-actions",
+        "GitHub.vscode-pull-request-github"
       ]
     }
   }

@@ -13,26 +13,10 @@ die() { echo "error: $*" >&2; exit 1; }
 
 command -v podman >/dev/null || die "podman is not installed"
 
-# Run a command under the Node version pinned in .nvmrc (via mise, fnm or nvm
-# if the active node doesn't match).
+# Run a command under the Node version pinned in mise.toml (installed on demand).
 run_node() {
-  local want have
-  want="$(tr -d 'v \r\n' < "$ROOT/.nvmrc")"
-  have="$(node -v 2>/dev/null | sed 's/^v//' || true)"
-  if [[ -n "$have" && "${have%%.*}" == "${want%%.*}" ]]; then
-    "$@"
-  elif command -v mise >/dev/null; then
-    mise exec "node@$want" -- "$@"
-  elif command -v fnm >/dev/null; then
-    fnm exec --using="$want" "$@"
-  elif [[ -s "${NVM_DIR:-$HOME/.nvm}/nvm.sh" ]]; then
-    # shellcheck disable=SC1091
-    source "${NVM_DIR:-$HOME/.nvm}/nvm.sh"
-    nvm install "$want" >/dev/null && nvm use "$want" >/dev/null
-    "$@"
-  else
-    die "Node $want (from .nvmrc) required; found '${have:-none}'. Install mise, fnm or nvm."
-  fi
+  command -v mise >/dev/null || die "mise is required (it pins Node in mise.toml): https://mise.jdx.dev"
+  mise exec -C "$ROOT" -- "$@"
 }
 
 # devcontainer CLI, pinned, pointed at Podman.
