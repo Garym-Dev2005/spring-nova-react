@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+# Build the dev container images (app + AWS Emulator) without starting them.
+source "$(dirname "${BASH_SOURCE[0]}")/../lib/common.sh"
+dc build "$@"
+compose build aws-emulator

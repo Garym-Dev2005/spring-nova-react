@@ -1,0 +1,4 @@
+# Enable auto-env with `sdkman_auto_env=true` in ~/.sdkman/etc/config, or run `sdk env`.
+# Matches api/ (Java toolchain 21, Gradle wrapper 9.9.2) and the devcontainer's installed SDKs.
+java=21.0.13.1-ms
+gradle=9.9.2

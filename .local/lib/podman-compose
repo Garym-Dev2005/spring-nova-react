@@ -1,0 +1,3 @@
+#!/usr/bin/env bash
+# The devcontainer CLI wants a single executable for compose; forward to Podman.
+exec podman compose "$@"

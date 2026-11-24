@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+# Start the dev container (and Postgres + AWS Emulator), then open a shell in it.
+# Extra args are passed to `devcontainer up` (e.g. --remove-existing-container).
+source "$(dirname "${BASH_SOURCE[0]}")/../lib/common.sh"
+dc up "$@"
+exec "$(dirname "${BASH_SOURCE[0]}")/devc-enter"

@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+# Open a shell (or run a command) in the already-running dev container.
+#   devc-enter            -> interactive bash
+#   devc-enter mvn test   -> run a command
+source "$(dirname "${BASH_SOURCE[0]}")/../lib/common.sh"
+[[ -n "$(app_container)" ]] || die "dev container is not running. Start it with: devc-up"
+[[ $# -gt 0 ]] || set -- bash
+dc exec "$@"

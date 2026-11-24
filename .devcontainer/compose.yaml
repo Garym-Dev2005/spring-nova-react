@@ -17,6 +17,8 @@ services:
     depends_on:
       db:
         condition: service_healthy
+      db-test:
+        condition: service_healthy
     # No depends_on for aws-emulator: it joins this container's network
     # namespace (cycle). emulator-trust.sh waits for it on start instead.
     environment:
@@ -27,9 +29,11 @@ services:
       PGPASSWORD: app
       PGDATABASE: app
       DATABASE_URL: postgresql://app:app@db:5432/app
-      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/app
-      SPRING_DATASOURCE_USERNAME: app
-      SPRING_DATASOURCE_PASSWORD: app
+      # No SPRING_DATASOURCE_* here on purpose: env vars outrank properties
+      # files and would defeat the API's `test` profile. application.properties
+      # already defaults to db:5432/app.
+      # Throwaway tmpfs Postgres used by the API's `test` Spring profile.
+      TEST_DATASOURCE_URL: jdbc:postgresql://db-test:5432/app_test
       # --- AWS Emulator (shares this container's network => 127.0.0.1) ---
       AWS_ENDPOINT_URL: https://127.0.0.1:9297
       AWS_SHARED_CREDENTIALS_FILE: /home/vscode/.aws/emulator/9297/emulator_credentials
@@ -59,6 +63,26 @@ services:
       - pgdata:/var/lib/postgresql
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U app -d app"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  # Second Postgres for tests: data lives in RAM (tmpfs), so it is fast and
+  # disposable. Test results are committed (not rolled back) so you can inspect
+  # them after a run: PGHOST=db-test PGDATABASE=app_test psql
+  # Contents are lost when this container stops.
+  db-test:
+    image: docker.io/library/postgres:19
+    restart: unless-stopped
+    command: ["postgres", "-c", "fsync=off", "-c", "synchronous_commit=off", "-c", "full_page_writes=off"]
+    environment:
+      POSTGRES_USER: app
+      POSTGRES_PASSWORD: app
+      POSTGRES_DB: app_test
+    tmpfs:
+      - /var/lib/postgresql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U app -d app_test"]
       interval: 5s
       timeout: 5s
       retries: 10

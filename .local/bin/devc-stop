@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+# Stop the dev container, Postgres and AWS Emulator. Data volumes are kept
+# (Postgres data survives; emulated AWS resources are in-memory and are lost).
+source "$(dirname "${BASH_SOURCE[0]}")/../lib/common.sh"
+[[ -n "$(app_container -a)" ]] || die "no dev container found for this folder"
+compose stop

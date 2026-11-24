@@ -1,0 +1,16 @@
+#!/usr/bin/env bash
+# Tear everything down: containers, network, volumes (Postgres data and the
+# emulator credentials), and the images built for this project.
+#   devc-down       asks for confirmation
+#   devc-down -y    no prompt
+source "$(dirname "${BASH_SOURCE[0]}")/../lib/common.sh"
+
+if [[ "${1:-}" != "-y" ]]; then
+  read -r -p "Delete containers, volumes (incl. Postgres data) and built images for '$LOCAL_WORKSPACE_FOLDER_BASENAME'? [y/N] " a
+  [[ "$a" =~ ^[Yy]$ ]] || { echo "aborted"; exit 1; }
+fi
+
+compose down --volumes --remove-orphans --rmi local || true
+# Images the devcontainer CLI builds when applying features.
+podman images -q --filter "reference=vsc-${LOCAL_WORKSPACE_FOLDER_BASENAME}-*" | sort -u | xargs -r podman rmi -f
+echo "cleaned up"
