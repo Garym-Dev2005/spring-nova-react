@@ -368,3 +368,6 @@ $RECYCLE.BIN/
 *.lnk
 
 # End of https://www.toptal.com/developers/gitignore/api/macos,linux,windows,vim,visualstudiocode,intellij+all,node,java
+
+# AWS Emulator per-run CA/credentials (bind-mounted from the devcontainer)
+.local/emulator/
