@@ -15,6 +15,11 @@ services:
     ports:
       - "127.0.0.1:9297:9297"
       - "127.0.0.1:9298-9317:9298-9317"
+      # Vite dev server / preview (`npm run dev`, `npm start` in web/).
+      # Vite must listen on 0.0.0.0 for this to work (see web/vite.config.ts).
+      - "127.0.0.1:5173:5173"
+      # Spring Boot API (`./gradlew bootRun` in api/).
+      - "127.0.0.1:8080:8080"
     volumes:
       - ..:/workspaces/${LOCAL_WORKSPACE_FOLDER_BASENAME:-podman-devcontainer}:cached,z
       # Credentials + CA cert written by the emulator, read by the SDKs here.

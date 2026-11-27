@@ -7,7 +7,18 @@ export default defineConfig({
   resolve: {
     tsconfigPaths: true,
   },
+  // Listen on all interfaces so the port published by the devcontainer
+  // (.devcontainer/compose.yaml) reaches the server; host exposure is limited
+  // to 127.0.0.1 there. `vite preview` has its own host setting.
+  preview: {
+    host: true,
+    port: 5173,
+    strictPort: true,
+  },
   server: {
+    host: true,
+    port: 5173,
+    strictPort: true,
     // Forward API calls to the Spring Boot app (`./gradlew bootRun` in api/).
     // The path is kept as-is (the API's routes already start with /api).
     // `vite preview` (npm start) reuses this proxy config.
