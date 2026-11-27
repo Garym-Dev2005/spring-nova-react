@@ -2,5 +2,9 @@ pre-commit:
   commands:
     kotlin-format:
       glob: "api/**/*.{kt,kts}"
-      run: .local/bin/format-code
+      run: .local/bin/format-code api
+      stage_fixed: true
+    web-format:
+      glob: "web/**/*.{ts,tsx,js,jsx,json,css,md}"
+      run: .local/bin/format-code web
       stage_fixed: true

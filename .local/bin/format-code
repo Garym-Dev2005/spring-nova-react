@@ -1,10 +1,33 @@
 #!/usr/bin/env bash
-# Format the api/ Kotlin sources (Spotless + ktlint). Also the lefthook pre-commit hook.
-#   format-code          apply formatting
-#   format-code --check  only report violations (non-zero exit if any)
+# Format the api/ Kotlin sources (Spotless + ktlint) and the web/ sources (Prettier).
+# Also the lefthook pre-commit hook.
+#   format-code [--check] [api|web]   (default: both; --check only reports violations)
 set -euo pipefail
-cd "$(dirname "${BASH_SOURCE[0]}")/../../api"
-if [[ "${1:-}" == "--check" ]]; then
-  exec ./gradlew spotlessCheck --console=plain -q
-fi
-exec ./gradlew spotlessApply --console=plain -q
+root="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
+check=false
+targets=()
+for arg in "$@"; do
+  case "$arg" in
+    --check) check=true ;;
+    api | web) targets+=("$arg") ;;
+    *) echo "usage: format-code [--check] [api|web]" >&2; exit 2 ;;
+  esac
+done
+[[ ${#targets[@]} -gt 0 ]] || targets=(api web)
+
+status=0
+for target in "${targets[@]}"; do
+  case "$target" in
+    api)
+      cd "$root/api"
+      if $check; then ./gradlew spotlessCheck --console=plain -q || status=1
+      else ./gradlew spotlessApply --console=plain -q || status=1; fi
+      ;;
+    web)
+      cd "$root/web"
+      if $check; then npm run --silent format:check || status=1
+      else npm run --silent format || status=1; fi
+      ;;
+  esac
+done
+exit $status

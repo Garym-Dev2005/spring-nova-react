@@ -15,7 +15,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 Everything runs through Podman; use the scripts, not `docker`/`podman compose` directly.
 
 - `devc-build` / `devc-up` (start + open shell) / `devc-enter [cmd…]` / `devc-stop` / `devc-down [-y]` (destroys volumes incl. Postgres data).
-- `format-code [--check]` — Spotless + ktlint for `api/`. Also runs as the lefthook pre-commit hook (re-stages fixes). Just runs `./gradlew spotlessApply`/`spotlessCheck` in `api/` with whatever Java is on the PATH.
+- `format-code [--check] [api|web]` — formats both by default: Spotless + ktlint for `api/` (`./gradlew spotlessApply`/`spotlessCheck`, with whatever Java is on the PATH) and Prettier (+ Tailwind class sorting; config in `web/.prettierrc.json`) for `web/` (`npm run format`/`format:check`). Also runs as the lefthook pre-commit hooks (`kotlin-format`, `web-format`; re-stage fixes).
 - Build/test/run happen **inside the container** (`devc-enter`), from `api/`:
   - `./gradlew test` — all tests; single class: `./gradlew test --tests '*ItemControllerTests'`; single test: `--tests '*AuthControllerTests.login returns a bearer token*'`
   - `./gradlew spotlessCheck` / `spotlessApply`

@@ -14,7 +14,7 @@ export default function Home() {
   const dispatch = useAppDispatch();
 
   return (
-    <main className="container mx-auto p-8 space-y-4">
+    <main className="container mx-auto space-y-4 p-8">
       <h1 className="text-2xl font-semibold">Spring Nova</h1>
       <p>React Router v7 (framework mode) with Redux Toolkit.</p>
       <div className="flex items-center gap-4">
