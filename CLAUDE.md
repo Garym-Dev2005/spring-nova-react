@@ -5,7 +5,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## Layout
 
 - `api/` — Spring Boot 4 / Kotlin / Gradle (Kotlin DSL) REST API, Java 21. Package `com.example.api`, layered: `config/`, `controller/` (HTTP only, delegates to services), `service/`, `repository/`, `model/entity/`, `model/dto/`, `mapper/` (entity→DTO extension functions), `exception/` (custom exceptions + `GlobalExceptionHandler` returning `ProblemDetail`). Tests mirror this; shared helpers live in `support/`.
-- `.devcontainer/` — Podman-based devcontainer: `app` (Java 21 and Node 24 from `mise.toml`, AWS CLI, psql), `db` (Postgres 19), `db-test` (Postgres 19 on tmpfs), `aws-emulator` (AWS Emulator, built from `.devcontainer/emulator/Dockerfile`). No React app exists yet.
+- `web/` — React Router **v7** (pinned `^7`; `create-react-router@latest` now scaffolds v8) in framework mode, **SPA mode (`ssr: false`), no server-side rendering**: `npm run build` emits static files in `build/client/`, and there is no Node server at runtime. Stack: Vite 8, Tailwind 4, TypeScript (`~/*` → `app/*`). Routes are configured in `app/routes.ts`. Global state uses Redux Toolkit in `app/store/`, provided by `StoreProvider` in `root.tsx`. Use the typed `useAppSelector`/`useAppDispatch` from `store/hooks.ts`.
+- `.devcontainer/` — Podman-based devcontainer: `app` (Java 21 and Node 24 from `mise.toml`, AWS CLI, psql), `db` (Postgres 19), `db-test` (Postgres 19 on tmpfs), `aws-emulator` (AWS Emulator, built from `.devcontainer/emulator/Dockerfile`).
 - `.local/bin/` — helper scripts, put on `PATH` by direnv; `.local/lib/common.sh` holds shared helpers.
 - `mise.toml` — pins node, java (Microsoft 21.0.13.1), gradle (9.9.2 = wrapper version), lefthook. Entering the repo with direnv runs `mise install` and `lefthook install`. mise is required by the scripts.
 
@@ -19,6 +20,7 @@ Everything runs through Podman; use the scripts, not `docker`/`podman compose` d
   - `./gradlew test` — all tests; single class: `./gradlew test --tests '*ItemControllerTests'`; single test: `--tests '*AuthControllerTests.login returns a bearer token*'`
   - `./gradlew spotlessCheck` / `spotlessApply`
   - `./gradlew bootRun` — serves :8080; Swagger UI at `/swagger-ui.html`, spec at `/v3/api-docs`.
+- From `web/`: `npm run dev` (:5173, forwarded), `npm run typecheck`, `npm run build`, `npm start` (previews the static `build/client/`). Both proxy `/api/*` to `localhost:8080` (`web/vite.config.ts`) and pass the browser `Host` through so HAL links point back at the dev server, so the web app calls relative `/api/...` URLs and needs no CORS.
 
 ## Architecture and gotchas
 
