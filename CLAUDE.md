@@ -5,7 +5,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## Layout
 
 - `api/` — Spring Boot 4 / Kotlin / Gradle (Kotlin DSL) REST API, Java 21. Package `com.example.api`, layered: `config/`, `controller/` (HTTP only, delegates to services), `service/`, `repository/`, `model/entity/`, `model/dto/`, `mapper/` (entity→DTO extension functions), `exception/` (custom exceptions + `GlobalExceptionHandler` returning `ProblemDetail`). Tests mirror this; shared helpers live in `support/`.
-- `.devcontainer/` — Podman-based devcontainer: `app` (Java 21, Node 24, AWS CLI, psql), `db` (Postgres 19), `db-test` (Postgres 19 on tmpfs), `aws-emulator` (AWS Emulator, built from `.devcontainer/emulator/Dockerfile`). No React app exists yet.
+- `.devcontainer/` — Podman-based devcontainer: `app` (Java 21 and Node 24 from `mise.toml`, AWS CLI, psql), `db` (Postgres 19), `db-test` (Postgres 19 on tmpfs), `aws-emulator` (AWS Emulator, built from `.devcontainer/emulator/Dockerfile`). No React app exists yet.
 - `.local/bin/` — helper scripts, put on `PATH` by direnv; `.local/lib/common.sh` holds shared helpers.
 - `mise.toml` — pins node, java (Microsoft 21.0.13.1), gradle (9.9.2 = wrapper version), lefthook. Entering the repo with direnv runs `mise install` and `lefthook install`. mise is required by the scripts.
 

@@ -15,16 +15,6 @@
       "resolved": "ghcr.io/devcontainers/features/git@sha256:fd75977de13a9979000e0e78baf949adb0ca71d2398995fa22e0a36d7e7e7fe2",
       "integrity": "sha256:fd75977de13a9979000e0e78baf949adb0ca71d2398995fa22e0a36d7e7e7fe2"
     },
-    "ghcr.io/devcontainers/features/java:1": {
-      "version": "1.8.3",
-      "resolved": "ghcr.io/devcontainers/features/java@sha256:61a839211feda1e2a1f10646648a948e733e4d98d770f3a4b6698a3c5fc92abe",
-      "integrity": "sha256:61a839211feda1e2a1f10646648a948e733e4d98d770f3a4b6698a3c5fc92abe"
-    },
-    "ghcr.io/devcontainers/features/node:1": {
-      "version": "1.7.1",
-      "resolved": "ghcr.io/devcontainers/features/node@sha256:8c0de46939b61958041700ee89e3493f3b2e4131a06dc46b4d9423427d06e5f6",
-      "integrity": "sha256:8c0de46939b61958041700ee89e3493f3b2e4131a06dc46b4d9423427d06e5f6"
-    },
     "ghcr.io/duduribeiro/devcontainer-features/neovim:1": {
       "version": "1.1.0",
       "resolved": "ghcr.io/duduribeiro/devcontainer-features/neovim@sha256:6419a34a5b06f87f934043b5141df8a29dcb495def1f3acad3acf481e8544d43",

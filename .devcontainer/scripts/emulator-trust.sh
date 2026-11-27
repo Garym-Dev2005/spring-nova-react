@@ -15,6 +15,12 @@ done
 curl -sf --cacert "$DIR/ca.pem" "https://127.0.0.1:$PORT/__admin/health" >/dev/null \
   || { echo "AWS Emulator did not become healthy on :$PORT" >&2; exit 1; }
 
+# Java comes from mise; postStartCommand runs without mise activated.
+if command -v mise >/dev/null; then
+  JAVA_BIN="$(dirname "$(readlink -f "$(mise which java 2>/dev/null || true)")")"
+  [ -x "$JAVA_BIN/keytool" ] && export PATH="$JAVA_BIN:$PATH"
+fi
+
 if command -v keytool >/dev/null; then
   JAVA_BIN="$(dirname "$(readlink -f "$(command -v java)")")"
   CACERTS="$JAVA_BIN/../lib/security/cacerts"

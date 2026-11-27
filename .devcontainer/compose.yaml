@@ -21,6 +21,8 @@ services:
       # Bind-mounted (not a named volume) so host tools can read the per-run CA
       # at .local/emulator/9297/ca.pem.
       - ../.local/emulator:/home/vscode/.aws/emulator:z
+      # Cache of tools installed by mise, so rebuilds don't re-download the JDK etc.
+      - mise-data:/home/vscode/.local/share/mise
     depends_on:
       db:
         condition: service_healthy
@@ -125,3 +127,4 @@ services:
 
 volumes:
   pgdata:
+  mise-data:

@@ -14,19 +14,14 @@
   ],
 
   "features": {
-    "ghcr.io/devcontainers/features/java:1": {
-      "version": "21",
-      "installMaven": "true",
-      "installGradle": "true"
-    },
-    "ghcr.io/devcontainers/features/node:1": {
-      "version": "24"
-    },
     "ghcr.io/devcontainers/features/aws-cli:1": {},
     "ghcr.io/duduribeiro/devcontainer-features/neovim:1": {
       "version": "stable" // or "nightly"
     }
   },
+
+  // Install the tools pinned in mise.toml (Java, Node, Gradle, lefthook).
+  "postCreateCommand": "mise trust && mise install",
 
   // The emulator generates a new cert on every start, so rebuild the merged
   // trust stores each time the container starts.
